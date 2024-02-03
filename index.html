@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+
+</head>
+<body>
+<button onclick="startWebSocket()">Iniciar Conexión</button>
+<button onclick="stopWebSocket()">Finalizar Conexión</button>
+
+<input type="text" id="messageInput" placeholder="Escribe tu mensaje aquí">
+<button onclick="sendMessage()">Enviar</button>
+<script>let socket;  // Declara el socket a nivel global para poder acceder en cualquier función
+
+function startWebSocket() {
+    socket = new WebSocket('wss://192.168.2.104:2000');
+
+    socket.onopen = function (e) {
+        console.log("[open] Conexión establecida");
+    };
+
+    socket.onmessage = function (event) {
+        console.log(`[message] Datos recibidos del servidor: ${event.data}`);
+    };
+
+    socket.onclose = function (event) {
+        if (event.wasClean) {
+            console.log(`[close] Conexión cerrada limpiamente, código=${event.code} motivo=${event.reason}`);
+        } else {
+            console.error('[close] Conexión fallecida');
+        }
+    };
+
+    socket.onerror = function (error) {
+        console.error(`[error] ${error.message}`);
+    };
+}
+
+function stopWebSocket() {
+    if (socket) {
+        socket.close();
+    }
+}
+
+function sendMessage() {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        const input = document.getElementById('messageInput');
+        const message = input.value;
+
+        socket.send(message);
+        input.value = '';  // Limpiar el input
+    } else {
+        console.error('No se puede enviar el mensaje: WebSocket no está en estado OPEN.');
+    }
+}
+
+</script>
+</body>
+</html>
