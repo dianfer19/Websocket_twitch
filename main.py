@@ -16,9 +16,10 @@ dispositivos_conectados = {}
 
 
 async def registro_cliente(websocket):
-    cliente_id = uuid.uuid4()
+    cliente_id = str(uuid.uuid4())
     dispositivos_conectados[cliente_id] = websocket
     print(f'Cliente {cliente_id} Conectado')
+    await websocket.send(json.dumps({'tipo': 'registro_cliente', 'cliente_id':cliente_id}))
     return cliente_id
 
 
@@ -31,9 +32,8 @@ async def listen(websocket):
     try:
         async for mensaje in websocket:
             for cliente, client_websocket in dispositivos_conectados.items():
-                # if cliente_id != cliente:
                 print(f"{cliente} dice:{mensaje}")
-                await client_websocket.send(json.dumps({'cliente_id': str(cliente), "mensaje": mensaje}))
+                await client_websocket.send(json.dumps({'cliente_id': cliente_id, "mensaje": mensaje}))
     except websockets.exceptions.ConnectionClosed as e:
         print(f"Cliente Desconectado: {cliente_id}")
     finally:
